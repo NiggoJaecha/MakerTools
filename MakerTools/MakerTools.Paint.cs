@@ -33,13 +33,18 @@ namespace MakerTools
         private Rect windowRect = new Rect(100, 100, 200, 260);
         List<Texture2D> colorTextures = new List<Texture2D>();
         List<Color> colors = new List<Color>() { Color.white, Color.black, Color.red, Color.green, Color.blue, Color.yellow };
+        private int colorIndex = 0;
 
         // Paint
         private static bool paintModeEnabled;
         private static GameObject paintObject;
-        private static GameObject realObject;
         private static MakerTools_Cursor3D paintCursor;
         public static Color paintColor = Color.white;
+        private static Texture2D paintBrush;
+        private static Shader paintShader;
+        private static RenderTexture paintTexture; //rt
+        private static RenderTexture paintTexture2; //rt2
+        private static Material paintMaterial;
 
         void Awake()
         {
@@ -51,6 +56,29 @@ namespace MakerTools
                 tex.Apply();
                 colorTextures.Add(tex);
             }
+
+            Texture2D brush = null; // 33
+            Shader shader = null; // 34
+
+            AssetBundle ab = AssetBundle.LoadFromMemory(System.IO.File.ReadAllBytes($@"{Paths.PluginPath}\MakerTools\Paint\dood.unity3d")); //36
+            try
+            {
+                //brush = ab.LoadAsset<Texture>("assets/brush.png");
+                //brush = Texture2D.whiteTexture;
+                brush = colorTextures[0]; 
+                shader = ab.LoadAsset<Shader>("assets/paint.shader"); // 40
+            }
+            catch (Exception) {
+                Logger.LogError("didn't load");
+            }
+            ab.Unload(false);
+
+            paintBrush = brush; // 45
+            paintShader = shader; // 46
+
+            paintMaterial = new Material(paintShader); // 48
+            paintMaterial.SetTexture("_Brush", paintBrush); // 56
+
         }
 
         void OnGUI()
@@ -74,6 +102,8 @@ namespace MakerTools
                 if (GUI.Button(new Rect(10+i*30, 70, 30,30), "", style))
                 {
                     paintColor = colors[i];
+                    colorIndex = i;
+                    paintMaterial?.SetColor("_Color", colors[i]);
                 }
             }
 
@@ -103,20 +133,13 @@ namespace MakerTools
                     {
                         Vector2 uv = calcUVCoordiante(EatInputCollider.EatInputCollider.hit);
                         Logger.LogInfo($"Calculated: UV {uv.x}|{uv.y}");
+                        paint(uv);
                     }
                     if (EatInputCollider.EatInputCollider.GetMouseButtonUp(0))
                     {
                         MakerTools.camCtrl.enabled = true;
                     }
                 }
-            }
-        }
-
-        private void coolio()
-        {
-            if (Singleton<GameCursor>.IsInstance())
-            {
-                Singleton<GameCursor>.Instance.SetCursorLock(false);
             }
         }
 
@@ -139,49 +162,12 @@ namespace MakerTools
             return uvResult;
         }
 
-        private void paintTexture(int x, int y, int radius, Color color, Texture2D texture)
+        private void paint(Vector2 pos, float scale = 0.01f)
         {
-            foreach(Vector2 coord in CalculateCirclePixels(x, y, radius))
-            {
-                texture.SetPixel((int)coord.x, (int)coord.y, color);
-            }
-            texture.Apply();
-        }
-
-        // thank you ChatGPT
-        public static List<Vector2> CalculateCirclePixels(int pX, int pY, int pRad)
-        {
-            int diameter = pRad * 2;
-            int radiusSquared = pRad * pRad;
-
-            // Create a list to store the coordinate pairs
-            var coordinates = new List<Vector2>();
-
-            for (int x = -pRad; x <= pRad; x++)
-            {
-                for (int y = -pRad; y <= pRad; y++)
-                {
-                    // Calculate the squared distance from the center
-                    int distanceSquared = x * x + y * y;
-
-                    // Check if the point is within the circle
-                    if (distanceSquared <= radiusSquared)
-                    {
-                        // Calculate the actual coordinates
-                        int coordX = pX + x;
-                        int coordY = pY + y;
-
-                        // Create a new Vector2 with the calculated coordinates
-                        Vector2 coordinate = new Vector2(coordX, coordY);
-
-                        // Add the coordinate pair to the list
-                        coordinates.Add(coordinate);
-                    }
-                }
-            }
-
-            // Convert the list to an array and return it
-            return coordinates;
+            paintMaterial.SetFloat("_Scale", scale); // 55
+            paintMaterial.SetVector("_Offset", pos); // 139
+            Graphics.Blit(paintTexture, paintTexture2, paintMaterial, 0); // 140
+            Graphics.Blit(paintTexture2, paintTexture); // 141
         }
 
         private void startPaintMode()
@@ -210,6 +196,18 @@ namespace MakerTools
             MakerTools.characterActive = false;
             paintCursor = new MakerTools_Cursor3D(Color.green);
             paintModeEnabled = true;
+            // feed object with rendertexture
+            Texture mainTexture = paintObject.GetComponent<MeshRenderer>()?.material?.mainTexture;
+            if (mainTexture == null)
+            {
+                stopPaintMode();
+                return;
+            }
+            paintTexture = new RenderTexture(mainTexture.width, mainTexture.height, 0, RenderTextureFormat.Default, RenderTextureReadWrite.Default); // 52
+            paintTexture2 = new RenderTexture(mainTexture.width, mainTexture.height, 0, RenderTextureFormat.Default, RenderTextureReadWrite.Default); // 53
+            paintMaterial.mainTexture = paintTexture; // 58
+            Graphics.Blit(mainTexture, paintTexture); // 61
+            paintObject.GetComponent<MeshRenderer>().material.mainTexture = paintTexture; // 62
         }
 
         private void stopPaintMode()

@@ -13,15 +13,12 @@ namespace EatInputCollider
         public const string GUID = "org.njaecha.plugins.eatinputcollider";
         public const string Version = "0.0.1";
 
-        private Camera camera;
-
-        internal static List<Collider> colliders;
+        internal static List<Collider> colliders = new List<Collider>();
         public static RaycastHit hit { get; private set; }
         public static bool isHit { get; private set; }
 
 		private static Dictionary<int, Dictionary<MouseState, bool>> _bools = new Dictionary<int, Dictionary<MouseState, bool>>();
         internal static bool eatInput;
-
 
 		internal enum MouseState
 		{
@@ -35,12 +32,12 @@ namespace EatInputCollider
 
             var harmony = new Harmony(GUID);
             harmony.PatchAll(typeof(EatInputCollider_InputPatch));
-            camera = Camera.main;
         }
 
         void Update()
         {
-            if (Physics.Raycast(camera.ScreenPointToRay(Input.mousePosition), out RaycastHit hit, Mathf.Infinity) && colliders.Contains(hit.collider))
+            if (Camera.main == null || colliders.Count < 1) return;
+            if (Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out RaycastHit hit, Mathf.Infinity) && colliders.Contains(hit.collider))
             {
                 eatInput = true;
                 isHit = true;
@@ -50,7 +47,6 @@ namespace EatInputCollider
             {
                 eatInput = false;
                 isHit = false;
-                hitCollider = null;
             }
         }
 

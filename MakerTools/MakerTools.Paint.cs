@@ -11,6 +11,7 @@ using UniRx;
 using UnityEngine;
 using MaterialEditorAPI;
 using KKAPI.Maker;
+using EatInputCollider;
 
 namespace MakerTools
 {
@@ -88,47 +89,26 @@ namespace MakerTools
 
             if (!paintModeEnabled) return;
 
-            // cast ray to work with
-            if (Physics.Raycast(MakerTools.camCtrl.thisCmaera.ScreenPointToRay(Input.mousePosition), out RaycastHit hit, Mathf.Infinity) && hit.collider.gameObject.Equals(paintObject))
+            if (EatInputCollider.EatInputCollider.isHit)
             {
-                // position cursor to raycast hit
-                paintCursor?.positionCursor(hit);
-
-                if (MakerTools.GetMouseButtonDown(0))
+                if (EatInputCollider.EatInputCollider.hit.collider.gameObject.Equals(paintObject))
                 {
-                    MakerTools.camCtrl.enabled = false;
+                    paintCursor?.positionCursor(EatInputCollider.EatInputCollider.hit);
+
+                    if (EatInputCollider.EatInputCollider.GetMouseButtonDown(0))
+                    {
+                        MakerTools.camCtrl.enabled = false;
+                    }
+                    if (EatInputCollider.EatInputCollider.GetMouseButton(0))
+                    {
+                        Vector2 uv = calcUVCoordiante(EatInputCollider.EatInputCollider.hit);
+                        Logger.LogInfo($"Calculated: UV {uv.x}|{uv.y}");
+                    }
+                    if (EatInputCollider.EatInputCollider.GetMouseButtonUp(0))
+                    {
+                        MakerTools.camCtrl.enabled = true;
+                    }
                 }
-
-                if (Input.GetMouseButton(0))
-                {
-                    Vector2 uv = calcUVCoordiante(hit);
-                    Logger.LogInfo($"Calculated : UV: ({uv.x} | {uv.y})");
-                    //Logger.LogInfo(Cursor.lockState); 
-                    //Texture texture = hit.collider?.gameObject?.GetComponent<MeshRenderer>()?.material?.mainTexture;
-                    //if(texture != null && texture is Texture2D)
-                    //{
-                    //    paintTexture((int)(texture.width * uv.x), (int)(texture.height * uv.y), 5, paintColor, (Texture2D)texture);
-                    //}
-                }
-
-                if (Input.GetMouseButtonUp(0))
-                {
-                    MakerTools.camCtrl.enabled = true;
-                }
-
-                MakerTools.EatMouseInput = true;
-            }
-            else
-            {
-                MakerTools.EatMouseInput = false;
-            }
-        }
-
-        void LateUpdate()
-        {
-            if (Input.GetKeyDown(KeyCode.H))
-            {
-                coolio();
             }
         }
 
@@ -226,6 +206,7 @@ namespace MakerTools
             }
 
             paintObject = MakerTools.createStaticObjectCopy((SkinnedMeshRenderer)rend);
+            EatInputCollider.EatInputCollider.RegisterCollider(paintObject.GetComponent<MeshCollider>());
             MakerTools.characterActive = false;
             paintCursor = new MakerTools_Cursor3D(Color.green);
             paintModeEnabled = true;
@@ -234,6 +215,7 @@ namespace MakerTools
         private void stopPaintMode()
         {
             // TODO: apply paintjob
+            EatInputCollider.EatInputCollider.UnregisterCollider(paintObject.GetComponent<MeshCollider>());
             DestroyImmediate(paintObject);
             MakerTools.characterActive = true;
             paintCursor.Destroy();

@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -54,13 +54,6 @@
     <Reference Include="KKSAPI, Version=1.35.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\IllusionModdingAPI.KKSAPI.1.35.0\lib\net46\KKSAPI.dll</HintPath>
       <Private>False</Private>
-    </Reference>
-    <Reference Include="KKS_ExtensibleSaveFormat, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\ExtensibleSaveFormat.KoikatsuSunshine.16.8.1\lib\net46\KKS_ExtensibleSaveFormat.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="KKS_MaterialEditor">
-      <HintPath>..\..\..\_Libs_KKS\mod\KKS_MaterialEditor.dll</HintPath>
     </Reference>
     <Reference Include="Sirenix.Serialization, Version=2.1.13.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\IllusionLibs.KoikatsuSunshine.UnityEngine.CoreModule.2019.4.9\lib\net46\Sirenix.Serialization.dll</HintPath>
@@ -126,13 +119,23 @@
       <HintPath>..\packages\IllusionLibs.KoikatsuSunshine.UnityEngine.UIModule.2019.4.9\lib\net46\UnityEngine.UIModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="KKS_ExtensibleSaveFormat">
+      <HintPath>..\packages\ExtensibleSaveFormat.KoikatsuSunshine.19.1.0\lib\net46\KKS_ExtensibleSaveFormat.dll</HintPath>
+    </Reference>
+    <Reference Include="KKS_MaterialEditor">
+      <HintPath>..\..\..\Documents\KKS_MaterialEditor.dll</HintPath>
+    </Reference>
+    <Reference Include="Vectrosity">
+      <HintPath>..\packages\IllusionLibs.Koikatu.Vectrosity.2019.4.27.4\lib\net35\Vectrosity.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="MakerTools.cs" />
     <Compile Include="MakerTools.Cusor3D.cs" />
-    <Compile Include="MakerTools.InputPatch.cs" />
+    <Compile Include="EatInputCollider.InputPatch.cs" />
     <Compile Include="MakerTools.Paint.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="EatInputCollider.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -168,4 +171,5 @@
   <PropertyGroup>
     <PostBuildEvent>copy "$(TargetPath)" "P:\Koikatsu_Sunshine\BepInEx\plugins\KKS_MakerTools.dll"</PostBuildEvent>
   </PropertyGroup>
+  <Import Project="..\packages\IllusionLibs.Koikatu.Vectrosity.2019.4.27.4\build\IllusionLibs.Koikatu.Vectrosity.targets" Condition="Exists('..\packages\IllusionLibs.Koikatu.Vectrosity.2019.4.27.4\build\IllusionLibs.Koikatu.Vectrosity.targets')" />
 </Project>

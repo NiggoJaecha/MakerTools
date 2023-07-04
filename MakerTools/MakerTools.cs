@@ -45,9 +45,6 @@ namespace MakerTools
             MakerTools.Instance = this;
 
             MakerAPI.RegisterCustomSubCategories += RegisterCustomSubCategories;
-
-            var harmony = new Harmony(GUID);
-            harmony.PatchAll(typeof(MakerTools_InputPatch));
         }
 
         void Update()

@@ -219,6 +219,7 @@ namespace MakerTools
         {
             // TODO: apply paintjob
             EatInputCollider.EatInputCollider.UnregisterCollider(paintObject.GetComponent<MeshCollider>());
+            MakerTools.camCtrl.listCollider?.Remove(paintObject.GetComponent<MeshCollider>());
             DestroyImmediate(paintObject);
             MakerTools.characterActive = true;
             paintCursor.Destroy();

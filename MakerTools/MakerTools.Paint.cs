@@ -12,6 +12,7 @@ using UnityEngine;
 using MaterialEditorAPI;
 using KKAPI.Maker;
 using EatInputCollider;
+using ADV.Commands.Base;
 
 namespace MakerTools
 {
@@ -57,23 +58,24 @@ namespace MakerTools
                 colorTextures.Add(tex);
             }
 
-            Texture2D brush = null; // 33
+            Texture brush = null; // 33
             Shader shader = null; // 34
 
-            AssetBundle ab = AssetBundle.LoadFromMemory(System.IO.File.ReadAllBytes($@"{Paths.PluginPath}\MakerTools\Paint\dood.unity3d")); //36
+            AssetBundle ab = AssetBundle.LoadFromMemory(System.IO.File.ReadAllBytes($@"{Paths.PluginPath}\MakerTools\Paint\paint.unity3d")); //36
             try
             {
-                //brush = ab.LoadAsset<Texture>("assets/brush.png");
+                brush = ab.LoadAsset<Texture>("assets/brush.png");
                 //brush = Texture2D.whiteTexture;
-                brush = colorTextures[0]; 
-                shader = ab.LoadAsset<Shader>("assets/paint.shader"); // 40
+                //brush = colorTextures[0]; 
+                //shader = ab.LoadAsset<Shader>("assets/paint_reduced.shader"); // 40
+                paintMaterial = ab.LoadAsset<Material>("assets/paint_reduced.mat");
             }
             catch (Exception) {
                 Logger.LogError("didn't load");
             }
             ab.Unload(false);
 
-            paintBrush = brush; // 45
+            paintBrush = (Texture2D)brush; // 45
             paintShader = shader; // 46
 
             paintMaterial = new Material(paintShader); // 48
@@ -128,6 +130,9 @@ namespace MakerTools
                     if (EatInputCollider.EatInputCollider.GetMouseButtonDown(0))
                     {
                         MakerTools.camCtrl.enabled = false;
+                        Vector2 uv = calcUVCoordiante(EatInputCollider.EatInputCollider.hit);
+                        Logger.LogInfo($"Calculated: UV {uv.x}|{uv.y}");
+                        paint(uv);
                     }
                     if (EatInputCollider.EatInputCollider.GetMouseButton(0))
                     {

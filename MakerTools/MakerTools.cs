@@ -104,6 +104,15 @@ namespace MakerTools
             }
         }
 
+        public static void ClearRenderTexture(RenderTexture texture)
+        {
+            RenderTexture r = RenderTexture.active;
+            RenderTexture.active = texture;
+            GL.Clear(true, true, Color.clear);
+            RenderTexture.active = r;
+        }
+
+
         /// <summary>
         /// Retrieves the GameObject the MaterialEditor UI is currently pointing to.
         /// </summary>

@@ -11,11 +11,13 @@ namespace EatInputCollider
     {
         public const string PluginName = "EatInputCollider";
         public const string GUID = "org.njaecha.plugins.eatinputcollider";
-        public const string Version = "0.0.1";
+        public const string Version = "0.1.1";
 
         internal static List<Collider> colliders = new List<Collider>();
         public static RaycastHit hit { get; private set; }
         public static bool isHit { get; private set; }
+
+        public static bool isEating { get => eatInput; }
 
 		private static Dictionary<int, Dictionary<MouseState, bool>> _bools = new Dictionary<int, Dictionary<MouseState, bool>>();
         internal static bool eatInput;
@@ -37,9 +39,10 @@ namespace EatInputCollider
         void Update()
         {
             if (Camera.main == null || colliders.Count < 1) return;
-            if (Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out RaycastHit hit, Mathf.Infinity) && colliders.Contains(hit.collider))
+            if (Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out RaycastHit hit, Mathf.Infinity) 
+                && colliders.Contains(hit.collider))
             {
-                eatInput = true;
+                if (!isMouseUsed()) eatInput = true;
                 isHit = true;
                 EatInputCollider.hit = hit;
             }
@@ -48,6 +51,19 @@ namespace EatInputCollider
                 eatInput = false;
                 isHit = false;
             }
+        }
+
+        private bool isMouseUsed()
+        {
+            return Input.GetMouseButton(0)
+                || Input.GetMouseButtonDown(0)
+                || Input.GetMouseButtonUp(0)
+                || Input.GetMouseButton(1)
+                || Input.GetMouseButtonDown(1)
+                || Input.GetMouseButtonUp(1)
+                || Input.GetMouseButton(2)
+                || Input.GetMouseButtonDown(2)
+                || Input.GetMouseButtonUp(2);
         }
 
         void LateUpdate()
